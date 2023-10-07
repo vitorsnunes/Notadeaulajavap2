@@ -1,0 +1,183 @@
+Nota de aula 
+Vitor antonino da silva nunes
+Sistemas para internet P2 turno tarde
+
+Biblioteca
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Livro {
+    private String titulo;
+    private String autor;
+    private boolean emprestado = false;
+
+    public Livro(String titulo, String autor) {
+        this.titulo = titulo;
+        this.autor = autor;
+    }
+
+    public boolean isDisponivel() {
+        return !emprestado;
+    }
+
+    public void emprestar() {
+        emprestado = true;
+    }
+
+    public void devolver() {
+        emprestado = false;
+    }
+
+    @Override
+    public String toString() {
+        return titulo + " - " + autor + " (" + (isDisponivel() ? "Disponível" : "Emprestado") + ")";
+    }
+}
+
+class Usuario {
+    private String nome;
+    private int id;
+
+    public Usuario(String nome, int id) {
+        this.nome = nome;
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return nome + " (ID: " + id + ")";
+    }
+}
+
+public class SistemaBiblioteca {
+    public static void main(String[] args) {
+        List<Livro> livros = new ArrayList<>();
+        List<Usuario> usuarios = new ArrayList<>();
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\nEscolha uma opção:");
+            System.out.println("1. Registrar um novo livro");
+            System.out.println("2. Registrar um novo usuário");
+            System.out.println("3. Realizar um empréstimo de livro");
+            System.out.println("4. Devolver um livro");
+            System.out.println("5. Exibir a lista de livros emprestados");
+            System.out.println("6. Sair");
+
+            int escolha = scanner.nextInt();
+            scanner.nextLine(); // Consumir a quebra de linha
+
+            switch (escolha) {
+                case 1:
+                    System.out.println("Digite o título do livro:");
+                    String tituloLivro = scanner.nextLine();
+                    System.out.println("Digite o autor do livro:");
+                    String autorLivro = scanner.nextLine();
+                    livros.add(new Livro(tituloLivro, autorLivro));
+                    System.out.println("Livro registrado com sucesso!");
+                    break;
+                case 2:
+                    System.out.println("Digite o nome do usuário:");
+                    String nomeUsuario = scanner.nextLine();
+                    System.out.println("Digite o ID do usuário:");
+                    int idUsuario = scanner.nextInt();
+                    scanner.nextLine(); // Consumir a quebra de linha
+                    usuarios.add(new Usuario(nomeUsuario, idUsuario));
+                    System.out.println("Usuário registrado com sucesso!");
+                    break;
+                case 3:
+                    System.out.println("Digite o ID do usuário:");
+                    int idEmprestimo = scanner.nextInt();
+                    scanner.nextLine(); // Consumir a quebra de linha
+                    System.out.println("Escolha o livro para emprestar:");
+                    listarLivrosDisponiveis(livros);
+                    int escolhaLivro = scanner.nextInt();
+                    scanner.nextLine(); // Consumir a quebra de linha
+                    if (emprestarLivro(usuarios, livros, idEmprestimo, escolhaLivro)) {
+                        System.out.println("Empréstimo realizado com sucesso!");
+                    } else {
+                        System.out.println("Empréstimo não pôde ser realizado. Verifique os dados.");
+                    }
+                    break;
+                case 4:
+                    System.out.println("Digite o ID do usuário:");
+                    int idDevolucao = scanner.nextInt();
+                    scanner.nextLine(); // Consumir a quebra de linha
+                    System.out.println("Escolha o livro para devolver:");
+                    listarLivrosEmprestados(livros);
+                    int escolhaDevolucao = scanner.nextInt();
+                    scanner.nextLine(); // Consumir a quebra de linha
+                    if (devolverLivro(usuarios, livros, idDevolucao, escolhaDevolucao)) {
+                        System.out.println("Devolução realizada com sucesso!");
+                    } else {
+                        System.out.println("Devolução não pôde ser realizada. Verifique os dados.");
+                    }
+                    break;
+                case 5:
+                    listarLivrosEmprestados(livros);
+                    break;
+                case 6:
+                    System.out.println("Saindo do programa. Obrigado!");
+                    System.exit(0);
+                default:
+                    System.out.println("Opção inválida. Por favor, escolha uma opção válida.");
+            }
+        }
+    }
+
+    private static void listarLivrosDisponiveis(List<Livro> livros) {
+        System.out.println("Livros disponíveis para empréstimo:");
+        int i = 1;
+        for (Livro livro : livros) {
+            if (livro.isDisponivel()) {
+                System.out.println(i + ". " + livro);
+                i++;
+            }
+        }
+    }
+
+    private static void listarLivrosEmprestados(List<Livro> livros) {
+        System.out.println("Livros emprestados:");
+        int i = 1;
+        for (Livro livro : livros) {
+            if (!livro.isDisponivel()) {
+                System.out.println(i + ". " + livro);
+                i++;
+            }
+        }
+    }
+
+    private static boolean emprestarLivro(List<Usuario> usuarios, List<Livro> livros, int idUsuario, int escolhaLivro) {
+        if (idUsuario <= 0 || idUsuario > usuarios.size() || escolhaLivro <= 0 || escolhaLivro > livros.size()) {
+            return false;
+        }
+
+        Usuario usuario = usuarios.get(idUsuario - 1);
+        Livro livro = livros.get(escolhaLivro - 1);
+
+        if (livro.isDisponivel()) {
+            livro.emprestar();
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean devolverLivro(List<Usuario> usuarios, List<Livro> livros, int idUsuario, int escolhaLivro) {
+        if (idUsuario <= 0 || idUsuario > usuarios.size() || escolhaLivro <= 0 || escolhaLivro > livros.size()) {
+            return false;
+        }
+
+        Usuario usuario = usuarios.get(idUsuario - 1);
+        Livro livro = livros.get(escolhaLivro - 1);
+
+        if (!livro.isDisponivel()) {
+            livro.devolver();
+            return true;
+        }
+
+        return false;
+    }
+}
